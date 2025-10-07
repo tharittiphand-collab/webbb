@@ -67,16 +67,8 @@ public function getAvailableSeats($showtimeId)
 
     $movie = \App\Models\Movie::findOrFail($movieId);
     $seatNumbers = explode(',', $request->seat_numbers);
-    $seatType = $request->input('seat_type', 'normal');
 
-    // ✅ เช็กราคาตามประเภท
-    $pricePerSeat = match ($seatType) {
-        'honeymoon' => 119.00,
-        'opera' => 400.00,
-        default => 99.00,
-    };
-
-    // ✅ ดึงที่นั่งที่ถูกจองแล้วในรอบนี้
+    // ✅ ดึงข้อมูลที่จองแล้ว
     $alreadyBooked = \App\Models\Booking::where('showtime_id', $request->showtime_id)
         ->whereIn('seat_number', $seatNumbers)
         ->where('status', '!=', 'Cancelled')
@@ -84,27 +76,38 @@ public function getAvailableSeats($showtimeId)
         ->toArray();
 
     if (count($alreadyBooked) > 0) {
-        // ถ้ามีที่นั่งซ้ำ → ห้ามจอง
         return back()->withErrors([
             'seat_numbers' => '❌ ที่นั่งเหล่านี้ถูกจองไปแล้ว: ' . implode(', ', $alreadyBooked)
         ]);
     }
 
-    // ✅ สร้างการจองใหม่ (เฉพาะที่นั่งที่ยังไม่ถูกจอง)
+    // ✅ ฟังก์ชันคำนวณราคาตามประเภทของที่นั่ง
+    $getPriceBySeat = function ($seat) {
+        $row = substr($seat, 0, 1); // ตัวอักษรแถว เช่น A, B, C...
+        if (in_array($row, ['A', 'B'])) return 119.00;  // Honeymoon
+        if (in_array($row, ['F', 'G', 'H'])) return 400.00; // Opera
+        return 99.00; // Normal
+    };
+
+    // ✅ คำนวณราคารวมทั้งหมด
+    $totalPrice = 0;
     foreach ($seatNumbers as $seat) {
-        \App\Models\Booking::create([
-            'user_id'     => auth()->id(),
-            'movie_id'    => $movie->id,
-            'theatre_id'  => $request->theatre_id,
-            'showtime_id' => $request->showtime_id,
-            'seat_number' => $seat,
-            'status'      => 'Pending',
-            'amount'      => $pricePerSeat,
-        ]);
+        $totalPrice += $getPriceBySeat($seat);
     }
 
+    // ✅ บันทึก Booking เดียว (บิลเดียว)
+    $booking = \App\Models\Booking::create([
+        'user_id'     => auth()->id(),
+        'movie_id'    => $movie->id,
+        'theatre_id'  => $request->theatre_id,
+        'showtime_id' => $request->showtime_id,
+        'seat_number' => implode(',', $seatNumbers), // รวมเป็นสตริงเดียว เช่น "A1,A2,A3"
+        'status'      => 'Pending',
+        'amount'      => $totalPrice, // ✅ ใช้ราคารวมทั้งหมด
+    ]);
+
     return redirect()->route('booking.history')
-        ->with('success', '✅ Booking successful! Your seats are reserved.');
+        ->with('success', '✅ Booking successful! Total: ' . number_format($totalPrice, 2) . ' ฿');
 }
 
     
