@@ -120,11 +120,10 @@
         const theatreId = this.value;
         const movieId = "{{ $movie->id }}";
         showtimeSelect.innerHTML = '<option value="">-- Select Showtime --</option>';
+        showtimeSelect.disabled = true;
+        resetSeatSelection();
 
-        if (!theatreId) {
-            showtimeSelect.disabled = true;
-            return;
-        }
+        if (!theatreId) return;
 
         fetch(`/api/movies/${movieId}/theatres/${theatreId}/showtimes`)
             .then(res => res.json())
@@ -136,12 +135,15 @@
                     showtimeSelect.appendChild(opt);
                 });
                 showtimeSelect.disabled = false;
-            });
+            })
+            .catch(() => alert('❌ ไม่สามารถโหลดรอบฉายได้'));
     });
 
-    // ✅ เมื่อเลือก Showtime -> โหลดที่นั่งที่จองแล้ว
+    // ✅ เมื่อเลือก Showtime -> โหลดที่นั่งที่จองแล้วจริงจาก DB
     showtimeSelect.addEventListener('change', function() {
         const showtimeId = this.value;
+        resetSeatSelection();
+
         if (!showtimeId) return;
 
         fetch(`/api/showtime/${showtimeId}/booked-seats`)
@@ -158,7 +160,8 @@
                         btn.disabled = true;
                     }
                 });
-            });
+            })
+            .catch(() => alert('❌ ไม่สามารถโหลดข้อมูลที่นั่งได้'));
     });
 
     // ✅ เมื่อคลิกเลือกที่นั่ง
@@ -181,22 +184,7 @@
                 btn.classList.add('selected');
             }
 
-            seatNumbersInput.value = selectedSeats.join(',');
-            seatTypeInput.value = type;
-
-            // คำนวณราคาทั้งหมด
-            const total = selectedSeats.reduce((sum, s) => {
-                const seatBtn = document.querySelector(`[data-seat="${s}"]`);
-                const seatType = seatBtn.classList.contains('honeymoon')
-                    ? 'honeymoon'
-                    : seatBtn.classList.contains('opera')
-                    ? 'opera'
-                    : 'normal';
-                return sum + getPriceByType(seatType);
-            }, 0);
-
-            selectedSeatsEl.textContent = selectedSeats.length ? selectedSeats.join(', ') : 'None';
-            totalPriceEl.textContent = total;
+            updateSeatSummary();
         });
     });
 
@@ -204,6 +192,30 @@
         if (type === 'honeymoon') return 119;
         if (type === 'opera') return 400;
         return 99;
+    }
+
+    function updateSeatSummary() {
+        seatNumbersInput.value = selectedSeats.join(',');
+        const total = selectedSeats.reduce((sum, s) => {
+            const seatBtn = document.querySelector(`[data-seat="${s}"]`);
+            const seatType = seatBtn.classList.contains('honeymoon')
+                ? 'honeymoon'
+                : seatBtn.classList.contains('opera')
+                ? 'opera'
+                : 'normal';
+            return sum + getPriceByType(seatType);
+        }, 0);
+
+        selectedSeatsEl.textContent = selectedSeats.length ? selectedSeats.join(', ') : 'None';
+        totalPriceEl.textContent = total;
+    }
+
+    function resetSeatSelection() {
+        selectedSeats = [];
+        seatNumbersInput.value = '';
+        selectedSeatsEl.textContent = 'None';
+        totalPriceEl.textContent = '0';
+        document.querySelectorAll('.seat').forEach(btn => btn.classList.remove('selected'));
     }
 </script>
 @endsection

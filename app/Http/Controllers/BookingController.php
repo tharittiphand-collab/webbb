@@ -12,11 +12,18 @@ class BookingController extends Controller
    public function selectSeat($movieId)
 {
     $movie = \App\Models\Movie::findOrFail($movieId);
-    $theatres = \App\Models\Theatre::all(); // ✅ ดึงโรงหนังทั้งหมด
-    $showtimes = []; // ยังไม่เลือกโรงเลยส่งว่างไว้ก่อน
+    $showtimes = \App\Models\Showtime::where('movie_id', $movieId)->get();
+    $theatres = \App\Models\Theatre::all(); // ✅ เพิ่มบรรทัดนี้
 
-    return view('user.booking_seat', compact('movie', 'theatres', 'showtimes'));
+    // ดึงที่นั่งที่ถูกจองแล้ว (optional)
+    $bookedSeats = \App\Models\Booking::where('movie_id', $movieId)
+        ->where('status', '!=', 'Cancelled')
+        ->pluck('seat_number')
+        ->toArray();
+
+    return view('user.booking_seat', compact('movie', 'showtimes', 'theatres', 'bookedSeats'));
 }
+
 
 public function getShowtimesByTheatre($movieId, $theatreId)
 {
@@ -53,32 +60,51 @@ public function getAvailableSeats($showtimeId)
     public function store(Request $request, $movieId)
 {
     $request->validate([
+        'theatre_id' => 'required|exists:theatres,id',
         'showtime_id' => 'required|exists:showtimes,id',
         'seat_numbers' => 'required|string',
     ]);
 
-    $movie = Movie::findOrFail($movieId);
-
-    // แปลงที่นั่งเป็น array
-    $seats = array_map('trim', explode(',', $request->seat_numbers));
+    $movie = \App\Models\Movie::findOrFail($movieId);
+    $seatNumbers = explode(',', $request->seat_numbers);
     $seatType = $request->input('seat_type', 'normal');
-    $pricePerSeat = ($seatType === 'honeymoon') ? 119.00 : 99.00;
 
-    // ✅ คำนวณราคารวม
-    $totalAmount = count($seats) * $pricePerSeat;
+    // ✅ เช็กราคาตามประเภท
+    $pricePerSeat = match ($seatType) {
+        'honeymoon' => 119.00,
+        'opera' => 400.00,
+        default => 99.00,
+    };
 
-    // ✅ สร้างการจองเดียว
-    Booking::create([
-        'user_id'     => auth()->id(),
-        'movie_id'    => $movie->id,
-        'showtime_id' => $request->showtime_id,
-        'seat_number' => implode(',', $seats), // เช่น "A1,A2,A3"
-        'status'      => 'Pending',
-        'amount'      => $totalAmount, // ✅ ราคารวมทั้งหมด
-    ]);
+    // ✅ ดึงที่นั่งที่ถูกจองแล้วในรอบนี้
+    $alreadyBooked = \App\Models\Booking::where('showtime_id', $request->showtime_id)
+        ->whereIn('seat_number', $seatNumbers)
+        ->where('status', '!=', 'Cancelled')
+        ->pluck('seat_number')
+        ->toArray();
+
+    if (count($alreadyBooked) > 0) {
+        // ถ้ามีที่นั่งซ้ำ → ห้ามจอง
+        return back()->withErrors([
+            'seat_numbers' => '❌ ที่นั่งเหล่านี้ถูกจองไปแล้ว: ' . implode(', ', $alreadyBooked)
+        ]);
+    }
+
+    // ✅ สร้างการจองใหม่ (เฉพาะที่นั่งที่ยังไม่ถูกจอง)
+    foreach ($seatNumbers as $seat) {
+        \App\Models\Booking::create([
+            'user_id'     => auth()->id(),
+            'movie_id'    => $movie->id,
+            'theatre_id'  => $request->theatre_id,
+            'showtime_id' => $request->showtime_id,
+            'seat_number' => $seat,
+            'status'      => 'Pending',
+            'amount'      => $pricePerSeat,
+        ]);
+    }
 
     return redirect()->route('booking.history')
-        ->with('success', 'Booking successful! Total amount: ' . $totalAmount . '฿');
+        ->with('success', '✅ Booking successful! Your seats are reserved.');
 }
 
     
