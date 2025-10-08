@@ -8,14 +8,14 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('bookings', function (Blueprint $table) {
-            $table->string('seat_number')->change(); // ✅ เปลี่ยนจาก integer → string
+            $table->string('seat_number')->change(); 
         });
     }
 
     public function down(): void
     {
         Schema::table('bookings', function (Blueprint $table) {
-            $table->integer('seat_number')->change(); // เผื่อ rollback
+            $table->integer('seat_number')->change(); 
         });
     }
 };

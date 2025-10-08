@@ -23,22 +23,12 @@
     <div class="col-md-6 text-center">
         <h5>Scan to Pay</h5>
 
-        @php
-            // เลือก payload ที่ต้องการใช้ฝังใน QR
-            // 1) ใช้ข้อความธรรมดา (อ่านง่าย)
-            $payload = $qrPayloadText;
-
-            // 2) หรือใช้เป็น URL ก็ได้ (สแกนแล้วเปิดหน้าเว็บ)
-            // $payload = $qrPayloadUrl;
-
-            $qrData = urlencode($payload);
-            // ขนาด QR: chs=250x250, ประเภท: cht=qr, ข้อมูล: chl=...
-            // เพิ่มระดับแก้ error ได้ด้วย chld=L|M|Q|H (เช่น H = สูงสุด)
-            $qrUrl  = "https://chart.googleapis.com/chart?chs=250x250&cht=qr&chld=H&chl={$qrData}";
-        @endphp
-
         <div class="bg-white d-inline-block p-3 rounded">
-            <img src="{{ $qrUrl }}" alt="QR Code" width="250" height="250">
+            @if($qrImageUrl)
+                <img src="{{ $qrImageUrl }}" alt="QR Code" width="250" height="250">
+            @else
+                <div class="text-danger">ไม่สามารถสร้าง QR Code ได้</div>
+            @endif
         </div>
 
         @if($booking->status !== 'Paid')

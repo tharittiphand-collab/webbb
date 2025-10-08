@@ -38,7 +38,8 @@
                     <td>{{ $movie->genre }}</td>
                     <td>{{ Str::limit($movie->description, 50) }}</td>
                     <td>
-                        <form method="POST" action="{{ route('admin.movies.destroy', $movie->id) }}">
+                        <a href="{{ route('admin.movies.edit', $movie->id) }}" class="btn btn-warning btn-sm me-1">✏️ Edit</a>
+                        <form method="POST" action="{{ route('admin.movies.destroy', $movie->id) }}" class="d-inline">
                             @csrf @method('DELETE')
                             <button class="btn btn-danger btn-sm">🗑️</button>
                         </form>

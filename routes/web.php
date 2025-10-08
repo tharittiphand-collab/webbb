@@ -56,6 +56,8 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->group(function () {
     // ✅ จัดการหนัง (All-in-one)
     Route::get('/movies', [AdminController::class, 'movies'])->name('admin.movies');
     Route::post('/movies', [AdminController::class, 'storeMovie'])->name('admin.movies.store');
+    Route::get('/movies/{id}/edit', [AdminController::class, 'editMovie'])->name('admin.movies.edit');
+    Route::put('/movies/{id}', [AdminController::class, 'updateMovie'])->name('admin.movies.update');
     Route::delete('/movies/{id}', [AdminController::class, 'destroyMovie'])->name('admin.movies.destroy');
 
     // ✅ จัดการโรงหนัง

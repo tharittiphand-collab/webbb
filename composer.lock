@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "42e515586ae4642a1a421c503510a335",
+    "content-hash": "e77ba3bff4a35690bfa9269f18501901",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -2771,6 +2771,64 @@
                 }
             ],
             "time": "2024-11-21T10:36:35+00:00"
+        },
+        {
+            "name": "omise/omise-php",
+            "version": "v3.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/omise/omise-php.git",
+                "reference": "7d3d984470c7bc69a495791f643620acf5da1945"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/omise/omise-php/zipball/7d3d984470c7bc69a495791f643620acf5da1945",
+                "reference": "7d3d984470c7bc69a495791f643620acf5da1945",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6"
+            },
+            "require-dev": {
+                "brain/monkey": "2.6.2",
+                "friendsofphp/php-cs-fixer": "^2.19.3 || ^3.9.5",
+                "phpstan/phpstan": "1.11.0",
+                "phpunit/phpunit": "^8.5 || ^9.5",
+                "vlucas/phpdotenv": "5.5.0"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "lib/omise/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Omise and contributors",
+                    "homepage": "https://github.com/omise/omise-php/graphs/contributors"
+                }
+            ],
+            "description": "A PHP library designed specifically to connect with Omise API.",
+            "homepage": "https://www.omise.co",
+            "keywords": [
+                "alipay payment",
+                "credit card payment",
+                "internet banking payment",
+                "konbini payment",
+                "omise",
+                "payment",
+                "payment processing"
+            ],
+            "support": {
+                "email": "support@omise.co",
+                "issues": "https://github.com/omise/omise-php/issues",
+                "source": "https://github.com/omise/omise-php/tree/v3.0.0"
+            },
+            "time": "2025-06-10T02:18:16+00:00"
         },
         {
             "name": "paragonie/constant_time_encoding",

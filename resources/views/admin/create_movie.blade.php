@@ -4,7 +4,7 @@
 <div class="container">
     <h3>➕ Add New Movie</h3>
 
-    <!-- ✅ ต้องมี enctype สำหรับ upload ไฟล์ -->
+    
     <form action="{{ route('admin.movies.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
@@ -23,7 +23,7 @@
             <textarea name="description" rows="4" class="form-control"></textarea>
         </div>
 
-        <!-- ✅ ช่องอัปโหลดโปสเตอร์ -->
+        
         <div class="mb-3">
             <label class="form-label">Poster (optional)</label>
             <input type="file" name="poster" class="form-control">

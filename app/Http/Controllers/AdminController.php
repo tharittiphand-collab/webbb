@@ -70,7 +70,54 @@ class AdminController extends Controller
     }
 
     /**
-     * ✅ เพิ่มโรงหนัง
+     * ✅ แสดงหน้าแก้ไขหนัง
+     */
+    public function editMovie($id)
+    {
+        $movie = Movie::findOrFail($id);
+        $theatres = Theatre::all();
+        $showtimes = Showtime::where('movie_id', $id)->with('theatre')->get();
+
+        return view('admin.edit-movie', compact('movie', 'theatres', 'showtimes'));
+    }
+
+    /**
+     * ✅ อัปเดตข้อมูลหนัง
+     */
+    public function updateMovie(Request $request, $id)
+    {
+        $movie = Movie::findOrFail($id);
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'genre' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'poster' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
+        $data = [
+            'title' => $request->title,
+            'genre' => $request->genre,
+            'description' => $request->description,
+        ];
+
+        // อัปเดตโปสเตอร์ถ้ามีการอัปโลดใหม่
+        if ($request->hasFile('poster')) {
+            // ลบรูปเก่า
+            if ($movie->poster && Storage::disk('public')->exists($movie->poster)) {
+                Storage::disk('public')->delete($movie->poster);
+            }
+            // อัปโลดรูปใหม่
+            $data['poster'] = $request->file('poster')->store('posters', 'public');
+        }
+
+        $movie->update($data);
+
+        return back()->with('success', '✅ Movie updated successfully!');
+    }
+
+    /**
+     
      */
     public function storeTheatre(Request $request)
     {
@@ -89,7 +136,7 @@ class AdminController extends Controller
     }
 
     /**
-     * ✅ เพิ่มรอบฉาย
+     
      */
     public function storeShowtime(Request $request)
     {

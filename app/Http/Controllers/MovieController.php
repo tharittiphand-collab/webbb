@@ -28,7 +28,7 @@ class MovieController extends Controller
                 $recommendations = Movie::where('genre', $genre)
                     ->where('id', '!=', $lastBooking->movie->id)
                     ->inRandomOrder()
-                    ->take(5)
+                    ->take(10)
                     ->get();
             }
         }

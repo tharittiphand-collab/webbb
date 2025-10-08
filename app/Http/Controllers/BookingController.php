@@ -13,7 +13,7 @@ class BookingController extends Controller
 {
     $movie = \App\Models\Movie::findOrFail($movieId);
     $showtimes = \App\Models\Showtime::where('movie_id', $movieId)->get();
-    $theatres = \App\Models\Theatre::all(); // ✅ เพิ่มบรรทัดนี้
+    $theatres = \App\Models\Theatre::all(); 
 
     // ดึงที่นั่งที่ถูกจองแล้ว (optional)
     $bookedSeats = \App\Models\Booking::where('movie_id', $movieId)
@@ -89,13 +89,13 @@ public function getAvailableSeats($showtimeId)
         return 99.00; // Normal
     };
 
-    // ✅ คำนวณราคารวมทั้งหมด
+    
     $totalPrice = 0;
     foreach ($seatNumbers as $seat) {
         $totalPrice += $getPriceBySeat($seat);
     }
 
-    // ✅ บันทึก Booking เดียว (บิลเดียว)
+    
     $booking = \App\Models\Booking::create([
         'user_id'     => auth()->id(),
         'movie_id'    => $movie->id,
@@ -103,7 +103,7 @@ public function getAvailableSeats($showtimeId)
         'showtime_id' => $request->showtime_id,
         'seat_number' => implode(',', $seatNumbers), // รวมเป็นสตริงเดียว เช่น "A1,A2,A3"
         'status'      => 'Pending',
-        'amount'      => $totalPrice, // ✅ ใช้ราคารวมทั้งหมด
+        'amount'      => $totalPrice, 
     ]);
 
     return redirect()->route('booking.history')
@@ -114,35 +114,36 @@ public function getAvailableSeats($showtimeId)
 
     
     public function payment($bookingId)
-    {
-        $booking = Booking::with(['movie', 'showtime'])->findOrFail($bookingId);
-
-        // อนุญาตเฉพาะเจ้าของการจอง (หรือแอดมิน)
-        if ($booking->user_id !== auth()->id() && !auth()->user()->is_admin) {
-            abort(403, 'Unauthorized');
-        }
-
-        // สร้างข้อความ/ลิงก์สำหรับฝังใน QR (เลือก 1 แบบ)
-        // แบบข้อความธรรมดา (อ่านง่าย)
-        $qrPayloadText = "CinemaTix Payment\n"
-            ."Booking ID: {$booking->id}\n"
-            ."Movie: {$booking->movie->title}\n"
-            ."Amount: {$booking->amount} THB";
-
-        // แบบลิงก์ (ถ้าต้องการให้สแกนแล้วพาไปยังหน้าใดหน้าหนึ่ง)
-        // NOTE: ถ้าทดสอบในเครื่อง ให้ใช้ ngrok หรือ IP ภายในเครือข่ายแทน localhost
-        $appUrl = rtrim(config('app.url'), '/'); // ต้องตั้ง APP_URL ใน .env
-        $qrPayloadUrl = "{$appUrl}/booking/{$booking->id}/payment"; // ลิงก์เดิมก็ได้
-
-        // ส่งไปที่ view ทั้ง 2 แบบ เผื่อเปลี่ยนใจ
-        return view('user.payment', [
-            'booking'      => $booking,
-            'qrPayloadText'=> $qrPayloadText,
-            'qrPayloadUrl' => $qrPayloadUrl,
-        ]);
+{
+    // Ensure Omise SDK is loaded
+    if (!class_exists('OmiseCharge')) {
+        require_once base_path('vendor/omise/omise-php/lib/Omise.php');
     }
+    // ดึง booking
+    $booking = Booking::with(['movie', 'showtime'])->findOrFail($bookingId);
 
-    // ✅ ผู้ใช้กด "I have paid" → อัปเดตสถานะเป็น Paid
+    $amount = (int) ($booking->amount * 100); // Omise ใช้หน่วยสตางค์
+    $currency = 'THB';
+
+    $charge = \OmiseCharge::create([
+        'amount' => $amount,
+        'currency' => $currency,
+        'source' => [
+            'type' => 'promptpay',
+        ],
+        'return_uri' => url()->current(),
+        'description' => 'Booking ID: ' . $booking->id,
+    ], env('OMISE_PUBLIC_KEY'), env('OMISE_SECRET_KEY'));
+
+    $qrImageUrl = $charge['source']['scannable_code']['image']['download_uri'] ?? null;
+
+    return view('user.payment', [
+        'booking'      => $booking,
+        'qrImageUrl'   => $qrImageUrl,
+    ]);
+}
+
+    
     public function updateStatus($bookingId)
     {
         $booking = Booking::findOrFail($bookingId);
@@ -159,7 +160,7 @@ public function getAvailableSeats($showtimeId)
    public function history()
 {
     $bookings = Booking::where('user_id', auth()->id())
-        ->with(['movie', 'showtime.theatre']) // ✅ ดึง theatre มาด้วย
+        ->with(['movie', 'showtime.theatre']) 
         ->latest()
         ->get();
 
