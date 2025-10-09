@@ -4,7 +4,7 @@
 <div class="container">
     <h3>✏️ Edit Movie</h3>
 
-    <!-- ✅ ต้องมี enctype สำหรับอัปโหลดไฟล์ -->
+    
     <form action="{{ route('admin.movies.update', $movie->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')

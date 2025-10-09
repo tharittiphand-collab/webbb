@@ -5,7 +5,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3>🎯 Admin Dashboard</h3>
         <div>
-            <!-- ✅ ปุ่มไปหน้าเดียวที่จัดการทุกอย่าง -->
+            
             <a href="{{ route('admin.movies') }}" class="btn btn-light btn-sm">
                 🎬 Manage All (Movies / Theatres / Showtimes)
             </a>

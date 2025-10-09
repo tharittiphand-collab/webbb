@@ -12,7 +12,7 @@
         <thead>
             <tr>
                 <th>Movie</th>
-                <th>Theatre</th> <!-- ✅ เพิ่ม -->
+                <th>Theatre</th> 
                 <th>Showtime</th>
                 <th>Seat</th>
                 <th>Status</th>
@@ -24,7 +24,7 @@
             @forelse($bookings as $b)
                 <tr>
                     <td>{{ $b->movie->title ?? '-' }}</td>
-                    <td>{{ $b->showtime->theatre->name ?? '-' }}</td> <!-- ✅ เพิ่ม -->
+                    <td>{{ $b->showtime->theatre->name ?? '-' }}</td> 
                     <td>{{ $b->showtime->show_date ?? '-' }} {{ $b->showtime->start_time ?? '' }}</td>
                     <td>{{ $b->seat_number }}</td>
 

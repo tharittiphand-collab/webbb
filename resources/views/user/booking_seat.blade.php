@@ -7,7 +7,7 @@
     <form action="{{ route('booking.store', $movie->id) }}" method="POST">
         @csrf
 
-        <!-- Theatre -->
+        
         <div class="mb-3 text-center">
             <label for="theatre_id" class="form-label">🏛️ Theatre</label>
             <select name="theatre_id" id="theatre_id" class="form-select w-50 mx-auto" required>
@@ -18,7 +18,7 @@
             </select>
         </div>
 
-        <!-- Showtime -->
+        
         <div class="mb-3 text-center">
             <label for="showtime_id" class="form-label">🕒 Showtime</label>
             <select name="showtime_id" id="showtime_id" class="form-select w-50 mx-auto" required disabled>
@@ -26,10 +26,10 @@
             </select>
         </div>
 
-        <!-- Screen -->
+        
         <div class="text-center bg-warning text-dark py-2 fw-bold mb-4 rounded">SCREEN</div>
 
-        <!-- Seat Map -->
+       
         <div id="seat-map" class="d-flex flex-column align-items-center gap-1 mb-3">
             @php
                 $rows = ['A','B','C','D','E','F','G','H','I','J'];
@@ -55,7 +55,7 @@
             @endforeach
         </div>
 
-        <!-- Hidden inputs -->
+        
         <input type="hidden" name="seat_numbers" id="seat_numbers">
         <input type="hidden" name="seat_type" id="seat_type">
 
@@ -66,7 +66,7 @@
             <button type="submit" class="btn btn-success px-4">Confirm & Pay</button>
         </div>
 
-        <!-- Legend -->
+        
         <div class="d-flex justify-content-center align-items-center gap-4 mt-4">
             <div><span class="legend normal"></span> Normal (99฿)</div>
             <div><span class="legend honeymoon"></span> Honeymoon (119฿)</div>
@@ -115,7 +115,7 @@
     const totalPriceEl = document.getElementById('total-price');
     let selectedSeats = [];
 
-    // ✅ เมื่อเลือกโรง -> โหลดรอบฉายของโรงนั้น
+    
     theatreSelect.addEventListener('change', function() {
         const theatreId = this.value;
         const movieId = "{{ $movie->id }}";
@@ -139,7 +139,7 @@
             .catch(() => alert('❌ ไม่สามารถโหลดรอบฉายได้'));
     });
 
-    // ✅ เมื่อเลือก Showtime -> โหลดที่นั่งที่จองแล้วจริงจาก DB
+    
     showtimeSelect.addEventListener('change', function() {
         const showtimeId = this.value;
         resetSeatSelection();
@@ -164,7 +164,7 @@
             .catch(() => alert('❌ ไม่สามารถโหลดข้อมูลที่นั่งได้'));
     });
 
-    // ✅ เมื่อคลิกเลือกที่นั่ง
+    
     document.querySelectorAll('.seat').forEach(btn => {
         btn.addEventListener('click', () => {
             if (btn.classList.contains('booked')) return;
