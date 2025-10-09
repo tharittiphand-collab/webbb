@@ -59,7 +59,7 @@
         <input type="hidden" name="seat_numbers" id="seat_numbers">
         <input type="hidden" name="seat_type" id="seat_type">
 
-        <!-- Summary -->
+       
         <div class="text-center mt-3">
             <p>🪑 Selected Seats: <span id="selected-seats">None</span></p>
             <p>💰 Total Price: <span id="total-price">0</span> ฿</p>
